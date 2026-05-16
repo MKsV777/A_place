@@ -24,8 +24,10 @@ import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity {
 
+    private WebView web;
     private GLSurfaceView glSurfaceView;
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,33 +69,42 @@ public class MainActivity extends AppCompatActivity {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
-        });
+        }); // android studio gave me this thing
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    @Override
     protected void iniciarpanelweb(renderizado render) {
-        runOnUiThread(() ->{
-           WebView web = new WebView(this);
-           web.getSettings().setJavaScriptEnabled(true);
-           web.getSettings().setDomStorageEnabled(true);
-           web.setWebViewClient(new WebViewClient());
+        runOnUiThread(() -> {
+            web = new WebView(this);
 
+            web.layout(0, 0, 1280, 720);
+            web.getSettings().setJavaScriptEnabled(true);
+            web.getSettings().setDomStorageEnabled(true);
+            web.setWebViewClient(new WebViewClient());
+            web.loadUrl("https://www.google.com");
             Runnable loopWeb = new Runnable() {
                 @Override
                 public void run() {
                     Surface superficie = render.obtenerSuperficie();
 
-                    if (superficie != null && superficie.isValid()){
+                    if (superficie != null && superficie.isValid()) {
                         try {
+
                             Canvas canvas = superficie.lockCanvas(null);
-                            web.draw(canvas);
-                            superficie.unlockCanvasAndPost(canvas);
+                            if (canvas != null) {
+                                web.draw(canvas);
+                                superficie.unlockCanvasAndPost(canvas);
+                            }
                         } catch (Exception ignored) {}
                     }
+
                     glSurfaceView.postDelayed(this, 33);
                 }
             };
+
+            glSurfaceView.postDelayed(loopWeb, 500);
+        });
+    }
 
 
     @Override
