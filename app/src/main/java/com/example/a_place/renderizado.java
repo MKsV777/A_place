@@ -101,7 +101,7 @@ public class renderizado implements GLSurfaceView.Renderer {
             paneltoque = true;
             return;
         }
-        float
+        //float
 
 
     })
