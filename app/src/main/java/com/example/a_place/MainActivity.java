@@ -1,9 +1,18 @@
 package com.example.a_place;
-
+import android.annotation.SuppressLint;
+import android.graphics.Canvas;
 import android.os.Bundle;
-
 import android.opengl.GLSurfaceView;
+import android.view.MotionEvent;
+import android.view.Surface;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 // no te olvides de hacerle commit cada hora
 
@@ -33,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(glSurfaceView);
 
+        iniciarpanelweb(renderer);
+
         glSurfaceView.setOnTouchListener((v, event) -> {
             int accion = event.getAction();
             float xd = event.getX(); // xdddddddd
@@ -58,6 +69,32 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
     }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    @Override
+    protected void iniciarpanelweb(renderizado render) {
+        runOnUiThread(() ->{
+           WebView web = new WebView(this);
+           web.getSettings().setJavaScriptEnabled(true);
+           web.getSettings().setDomStorageEnabled(true);
+           web.setWebViewClient(new WebViewClient());
+
+            Runnable loopWeb = new Runnable() {
+                @Override
+                public void run() {
+                    Surface superficie = render.obtenerSuperficie();
+
+                    if (superficie != null && superficie.isValid()){
+                        try {
+                            Canvas canvas = superficie.lockCanvas(null);
+                            web.draw(canvas);
+                            superficie.unlockCanvasAndPost(canvas);
+                        } catch (Exception ignored) {}
+                    }
+                    glSurfaceView.postDelayed(this, 33);
+                }
+            };
+
 
     @Override
     protected void onResume() {
