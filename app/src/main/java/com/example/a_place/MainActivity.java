@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.opengl.GLSurfaceView;
 
 
+// no te olvides de hacerle commit cada hora
+
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -38,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
             switch (accion){
                 case android.view.MotionEvent.ACTION_DOWN:
                 case android.view.MotionEvent.ACTION_MOVE:
-                    renderer.actualizartoque(x, y, true);
+                    renderer.actualizartoque(xd, yd, true);
 
                     break;
                 case android.view.MotionEvent.ACTION_UP:

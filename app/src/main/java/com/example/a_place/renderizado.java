@@ -40,6 +40,8 @@ public class renderizado implements GLSurfaceView.Renderer {
 
     private boolean paneltoque = false;
 
+    private float pantallaAncho = 1f;
+    private float pantallaAlto = 1f;
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
@@ -101,10 +103,21 @@ public class renderizado implements GLSurfaceView.Renderer {
             paneltoque = true;
             return;
         }
-        //float
+        float normalglx = (x / pantallaAncho) * 2.0f - 1.0f;
+        float normalgly = (y / pantallaAlto) * 2.0f - 1.0f;
 
+        if(normalglx >= -0.5f && normalglx <= 0.5f && normalgly >= -0.5f && normalgly <= 0.5f){
+            paneltoque = true;
 
-    })
+            float webviewX = (normalglx + 0.5f);
+            float webviewY = (normalgly + 0.5f);
+
+        }
+        else{
+            paneltoque = false;
+        }
+
+    }
 
     public int cargashade(int tipo, String codigo) {
         int shader = GLES20.glCreateShader(tipo);
