@@ -69,26 +69,28 @@ class MainActivity : AppCompatActivity() {
     protected fun iniciarpanelweb(render: renderizado) {
         runOnUiThread(Runnable {
             web = WebView(this)
+
+            val anchoSpec = View.MeasureSpec.makeMeasureSpec(1280, View.MeasureSpec.EXACTLY)
+            val altoSpec = View.MeasureSpec.makeMeasureSpec(720, View.MeasureSpec.EXACTLY)
+            web!!.measure(anchoSpec, altoSpec)
             web!!.layout(0, 0, 1280, 720)
-            web!!.getSettings().setJavaScriptEnabled(true)
-            web!!.getSettings().setDomStorageEnabled(true)
-            web!!.setWebViewClient(WebViewClient())
+            web!!.settings.javaScriptEnabled = true
+            web!!.settings.domStorageEnabled = true
+            web!!.webViewClient = WebViewClient()
             web!!.loadUrl("https://www.google.com")
             val loopWeb: Runnable = object : Runnable {
                 override fun run() {
                     val superficie = render.obtenerSuperficie()
 
-                    if (superficie != null && superficie.isValid()) {
+                    if (superficie != null && superficie.isValid) {
                         try {
                             val canvas = superficie.lockCanvas(null)
                             if (canvas != null) {
                                 web!!.draw(canvas)
                                 superficie.unlockCanvasAndPost(canvas)
                             }
-                        } catch (ignored: Exception) {
-                        }
+                        } catch (ignored: Exception) {}
                     }
-
                     glSurfaceView!!.postDelayed(this, 33)
                 }
             }

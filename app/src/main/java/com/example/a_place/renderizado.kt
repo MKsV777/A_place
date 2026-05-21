@@ -45,22 +45,26 @@ class renderizado : GLSurfaceView.Renderer {
         return mSurface
     }
 
-    private val codigoShader = "attribute vec4 vPosition;" +
-            "atribute vec4 vTexCoord;" +  // aca por lo que tengo entendido tengo atribute vec4 almacena 4 cosas en una variable
-            "varying vec2 TexCoord;" +  // lo mismo aqui
-            "void main() {" +  // iniciamos main
-            "gl_Position = vPosition;" +  // definimos la posicion
-            "TextCoord = vTexCoord" +  // definimos el stream que se enviara a el texture 2D
-            "}"
+    private val codigoShader = """
+        attribute vec4 vPosition;
+        attribute vec2 vTexCoord; // Changed to vec2
+        varying vec2 TexCoord;
+        void main() {
+            gl_Position = vPosition;
+            TexCoord = vTexCoord; // Fixed name mismatch and added semicolon
+        }
+    """.trimIndent()
 
-    private val fragmentoshader =
-        "#extension GL_OES_EGL_image_external : require\\n" +  // inicia la libreria creo de imagen externa
-                "precision mediump float;" +
-                "varying vec2 TexCoord;" +
-                "uniform samplerExternalOES sTexture;" +  // inicia lo que al final le daremos a el panel para que se muestre como textura
-                "void main(){" +
-                "   gl_FragColor = texture2D(sTexture, TexCoord);" +  // le damos la textura y el stream de datos que definimos anteriormente es para la imagen externa
-                "}"
+    private val fragmentoshader ="""
+        #extension GL_OES_EGL_image_external : require
+        precision mediump float;
+        varying vec2 TexCoord;
+        uniform samplerExternalOES sTexture;
+        uniform vec4 uColor; // Added this!
+        void main() {
+           gl_FragColor = texture2D(sTexture, TexCoord) * uColor;
+        }
+    """.trimIndent()
 
 
     private var paneltoque = false
