@@ -61,8 +61,11 @@ class renderizado : GLSurfaceView.Renderer {
         varying vec2 TexCoord;
         uniform samplerExternalOES sTexture;
         uniform vec4 uColor; // Added this!
+        uniform vec2 uOffset;
         void main() {
+           gl_Position = vec4(vPosition.x + uOffset.x, vPosition.y + uOffset.y, vPosition.z, vPosition.w);
            gl_FragColor = texture2D(sTexture, TexCoord) * uColor;
+           TexCoord = vTexCoord;
         }
     """.trimIndent()
 
@@ -122,14 +125,17 @@ class renderizado : GLSurfaceView.Renderer {
 
     override fun onDrawFrame(gl: GL10?) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
-
+        val offsetHandle = GLES20.glGetUniformLocation(ShaderPrograma, "uOffset")
         if (mSurfaceTexture != null) {
             try {
                 mSurfaceTexture!!.updateTexImage()
             } catch (ignored: Exception) {
             }
         }
-
+        GLES20.glUniform2f(offsetHandle, 0.0f, 0.0f)
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6)
+        GLES20.glUniform2f(offsetHandle, 0.6f, 0.0f)
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6)
         GLES20.glUseProgram(ShaderPrograma)
 
 
