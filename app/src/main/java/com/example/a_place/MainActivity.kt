@@ -1,121 +1,109 @@
-package com.example.a_place;
-import android.annotation.SuppressLint;
-import android.graphics.Canvas;
-import android.os.Bundle;
-import android.opengl.GLSurfaceView;
-import android.view.MotionEvent;
-import android.view.Surface;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+package com.example.a_place
 
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import android.annotation.SuppressLint
+import android.opengl.GLSurfaceView
+import android.os.Bundle
+import android.view.MotionEvent
+import android.view.View
+import android.view.View.OnTouchListener
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.OnApplyWindowInsetsListener
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 // no te olvides de hacerle commit cada hora
-
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
-public class MainActivity extends AppCompatActivity {
-
-    private WebView web;
-    private GLSurfaceView glSurfaceView;
+class MainActivity : AppCompatActivity() {
+    private var web: WebView? = null
+    private var glSurfaceView: GLSurfaceView? = null
 
     @SuppressLint("ClickableViewAccessibility")
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
 
-        glSurfaceView = new GLSurfaceView(this);
+        glSurfaceView = GLSurfaceView(this)
 
-        glSurfaceView.setEGLContextClientVersion(2);
+        glSurfaceView!!.setEGLContextClientVersion(2)
 
-        glSurfaceView.setEGLContextClientVersion(2);
+        glSurfaceView!!.setEGLContextClientVersion(2)
 
-        renderizado renderer = new renderizado();
-        glSurfaceView.setRenderer(renderer);
+        val renderer = renderizado()
+        glSurfaceView!!.setRenderer(renderer)
 
-        setContentView(glSurfaceView);
+        setContentView(glSurfaceView)
 
-        iniciarpanelweb(renderer);
+        iniciarpanelweb(renderer)
 
-        glSurfaceView.setOnTouchListener((v, event) -> {
-            int accion = event.getAction();
-            float xd = event.getX(); // xdddddddd
-            float yd = event.getY();
-            switch (accion){
-                case android.view.MotionEvent.ACTION_DOWN:
-                case android.view.MotionEvent.ACTION_MOVE:
-                    renderer.actualizartoque(xd, yd, true);
+        glSurfaceView!!.setOnTouchListener(OnTouchListener { v: View?, event: MotionEvent? ->
+            val accion = event!!.getAction()
+            val xd = event.getX() // xdddddddd
+            val yd = event.getY()
+            when (accion) {
+                MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> renderer.actualizartoque(
+                    xd,
+                    yd,
+                    true
+                )
 
-                    break;
-                case android.view.MotionEvent.ACTION_UP:
-                case android.view.MotionEvent.ACTION_CANCEL:
-                        renderer.actualizartoque(0, 0, false);
-                    break;
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> renderer.actualizartoque(
+                    0f,
+                    0f,
+                    false
+                )
             }
-            return true;
+            true
+        })
 
-        });
-
-        ViewCompat.setOnApplyWindowInsetsListener(glSurfaceView, (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        }); // android studio gave me this thing
+        ViewCompat.setOnApplyWindowInsetsListener(
+            glSurfaceView!!,
+            OnApplyWindowInsetsListener { v: View?, insets: WindowInsetsCompat? ->
+                val systemBars = insets!!.getInsets(WindowInsetsCompat.Type.systemBars())
+                v!!.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+                insets
+            }) // android studio gave me this thing
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    protected void iniciarpanelweb(renderizado render) {
-        runOnUiThread(() -> {
-            web = new WebView(this);
-
-            web.layout(0, 0, 1280, 720);
-            web.getSettings().setJavaScriptEnabled(true);
-            web.getSettings().setDomStorageEnabled(true);
-            web.setWebViewClient(new WebViewClient());
-            web.loadUrl("https://www.google.com");
-            Runnable loopWeb = new Runnable() {
-                @Override
-                public void run() {
-                    Surface superficie = render.obtenerSuperficie();
+    protected fun iniciarpanelweb(render: renderizado) {
+        runOnUiThread(Runnable {
+            web = WebView(this)
+            web!!.layout(0, 0, 1280, 720)
+            web!!.getSettings().setJavaScriptEnabled(true)
+            web!!.getSettings().setDomStorageEnabled(true)
+            web!!.setWebViewClient(WebViewClient())
+            web!!.loadUrl("https://www.google.com")
+            val loopWeb: Runnable = object : Runnable {
+                override fun run() {
+                    val superficie = render.obtenerSuperficie()
 
                     if (superficie != null && superficie.isValid()) {
                         try {
-
-                            Canvas canvas = superficie.lockCanvas(null);
+                            val canvas = superficie.lockCanvas(null)
                             if (canvas != null) {
-                                web.draw(canvas);
-                                superficie.unlockCanvasAndPost(canvas);
+                                web!!.draw(canvas)
+                                superficie.unlockCanvasAndPost(canvas)
                             }
-                        } catch (Exception ignored) {}
+                        } catch (ignored: Exception) {
+                        }
                     }
 
-                    glSurfaceView.postDelayed(this, 33);
+                    glSurfaceView!!.postDelayed(this, 33)
                 }
-            };
-
-            glSurfaceView.postDelayed(loopWeb, 500);
-        });
+            }
+            glSurfaceView!!.postDelayed(loopWeb, 500)
+        })
     }
 
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        glSurfaceView.onResume();
+    override fun onResume() {
+        super.onResume()
+        glSurfaceView!!.onResume()
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        glSurfaceView.onPause();
+    override fun onPause() {
+        super.onPause()
+        glSurfaceView!!.onPause()
     }
 }
