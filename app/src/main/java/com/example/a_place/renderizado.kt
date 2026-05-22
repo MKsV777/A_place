@@ -5,22 +5,21 @@ import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.view.Surface
 import java.nio.ByteBuffer
+import android.content.Context
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
-class renderizado : GLSurfaceView.Renderer {
+class renderizado(val context: Context) : GLSurfaceView.Renderer {
     private var buffervertices: FloatBuffer? = null
     private var bufferTexturas: FloatBuffer? = null
 
 
-    private var idTexturaOES = 0
     private var ShaderPrograma = 0
-    private var mSurfaceTexture: SurfaceTexture? = null
-    private var mSurface: Surface? = null
 
-    private val surfaceTexture: SurfaceTexture? = null
+
+
 
 
     private val panel = floatArrayOf(
@@ -42,9 +41,14 @@ class renderizado : GLSurfaceView.Renderer {
         1.0f, 1.0f,
         1.0f, 0.0f
     )
-    fun obtenerSuperficie(): Surface? {
-        return mSurface
+
+    fun nuevopanel(url: String, x: Float, y: Float){
+        val panelnuevo = PanelWeb(context, url, 1280, 720)
+        panelnuevo.xOffset = x
+        panelnuevo.yOffset = y
+        paneles.add(panelnuevo)
     }
+
 
     private val codigoShader = """
         attribute vec4 vPosition;
@@ -72,7 +76,7 @@ class renderizado : GLSurfaceView.Renderer {
 
 
     private var paneltoque = false
-
+    private val paneles = mutableListOf<PanelWeb>()
     private val pantallaAncho = 1f
     private val pantallaAlto = 1f
 
@@ -94,21 +98,6 @@ class renderizado : GLSurfaceView.Renderer {
         bufferTexturas!!.put(paneluv)
         bufferTexturas!!.position(0)
 
-        val texturas = IntArray(1)
-        GLES20.glGenTextures(1, texturas, 0)
-        idTexturaOES = texturas[0]
-
-        GLES20.glBindTexture(
-            0x8D65,
-            idTexturaOES
-        ) // 0x8D65 es aparentemente GLES11Ext.GL_TEXTURE_EXTERNAL_OES
-        GLES20.glTexParameterf(0x8D65, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR.toFloat())
-        GLES20.glTexParameterf(0x8D65, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR.toFloat())
-
-        mSurfaceTexture = SurfaceTexture(idTexturaOES)
-        mSurfaceTexture!!.setDefaultBufferSize(1280, 720)
-        mSurface = Surface(mSurfaceTexture)
-
         val shader = cargashade(GLES20.GL_VERTEX_SHADER, codigoShader)
         val fragmentoshaderman = cargashade(GLES20.GL_FRAGMENT_SHADER, fragmentoshader)
 
@@ -127,15 +116,9 @@ class renderizado : GLSurfaceView.Renderer {
     override fun onDrawFrame(gl: GL10?) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
 
-        if (mSurfaceTexture != null) {
-            try {
-                mSurfaceTexture!!.updateTexImage()
-            } catch (ignored: Exception) {}
-        }
-
         GLES20.glUseProgram(ShaderPrograma)
 
-        // ponemos los atributos
+
         val posicionman = GLES20.glGetAttribLocation(ShaderPrograma, "vPosition")
         GLES20.glEnableVertexAttribArray(posicionman)
         GLES20.glVertexAttribPointer(posicionman, 3, GLES20.GL_FLOAT, false, 0, buffervertices)
@@ -144,19 +127,25 @@ class renderizado : GLSurfaceView.Renderer {
         GLES20.glEnableVertexAttribArray(uvHandle)
         GLES20.glVertexAttribPointer(uvHandle, 2, GLES20.GL_FLOAT, false, 0, bufferTexturas)
 
-        // ponelos la textura
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
-        GLES20.glBindTexture(0x8D65, idTexturaOES)
-        GLES20.glUniform1i(GLES20.glGetUniformLocation(ShaderPrograma, "sTexture"), 0)
-
-        // ponemos el color
-        val colorman = GLES20.glGetUniformLocation(ShaderPrograma, "uColor")
-        GLES20.glUniform4f(colorman, 1.0f, 1.0f, 1.0f, 1.0f)
-
-        // posicion a 0 y a dibujar
         val offsetHandle = GLES20.glGetUniformLocation(ShaderPrograma, "uOffset")
-        GLES20.glUniform2f(offsetHandle, 0.0f, 0.0f)
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6)
+        val colorman = GLES20.glGetUniformLocation(ShaderPrograma, "uColor")
+
+
+        paneles.forEach { panel ->
+            if (panel.textureId == -1) {
+                panel.iniciarTextura()
+            }
+
+            panel.update()
+            panel.updateTexture()
+
+            GLES20.glUniform2f(offsetHandle, panel.xOffset, panel.yOffset)
+            GLES20.glUniform4f(colorman, 1.0f, 1.0f, 1.0f, 1.0f)
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
+            GLES20.glBindTexture(0x8D65, panel.textureId)
+            GLES20.glUniform1i(GLES20.glGetUniformLocation(ShaderPrograma, "sTexture"), 0)
+            GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6)
+        }
 
         GLES20.glDisableVertexAttribArray(posicionman)
         GLES20.glDisableVertexAttribArray(uvHandle)
@@ -180,7 +169,7 @@ class renderizado : GLSurfaceView.Renderer {
         }
     }
 
-    fun cargashade(tipo: Int, codigo: String?): Int {
+    fun cargashade(tipo: Int, codigo: String): Int {
         val shader = GLES20.glCreateShader(tipo)
         GLES20.glShaderSource(shader, codigo)
         GLES20.glCompileShader(shader)
