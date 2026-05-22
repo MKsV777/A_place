@@ -24,48 +24,49 @@ class renderizado : GLSurfaceView.Renderer {
 
 
     private val panel = floatArrayOf(
-        -0.5f, 0.5f, 0.0f,
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        -0.5f, 0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.5f, 0.5f, 0.0f
+        -0.5f,  0.5f, 0.0f, // Top Left
+        -0.5f, -0.5f, 0.0f, // Bottom Left
+        0.5f, -0.5f, 0.0f, // Bottom Right
+
+        -0.5f,  0.5f, 0.0f, // Top Left
+        0.5f, -0.5f, 0.0f, // Bottom Right
+        0.5f,  0.5f, 0.0f  // Top Right
     )
 
     private val paneluv = floatArrayOf(
-        0.0f, 1.0f,
+        0.0f, 0.0f,
         0.0f, 1.0f,
         1.0f, 1.0f,
+
         0.0f, 0.0f,
         1.0f, 1.0f,
         1.0f, 0.0f
     )
-
     fun obtenerSuperficie(): Surface? {
         return mSurface
     }
 
     private val codigoShader = """
         attribute vec4 vPosition;
-        attribute vec2 vTexCoord; // Changed to vec2
-        varying vec2 TexCoord;
+        attribute vec2 vTexCoord;
+        uniform vec2 uOffset;
+        varying vec2 vTexCoordOut;
         void main() {
-            gl_Position = vPosition;
-            TexCoord = vTexCoord; // Fixed name mismatch and added semicolon
+            // Apply the offset to the position
+            gl_Position = vec4(vPosition.x + uOffset.x, vPosition.y + uOffset.y, vPosition.z, vPosition.w);
+            vTexCoordOut = vTexCoord;
         }
     """.trimIndent()
 
-    private val fragmentoshader ="""
+    private val fragmentoshader = """
         #extension GL_OES_EGL_image_external : require
         precision mediump float;
-        varying vec2 TexCoord;
+        varying vec2 vTexCoordOut; // MUST match the output name exactly
         uniform samplerExternalOES sTexture;
-        uniform vec4 uColor; // Added this!
-        uniform vec2 uOffset;
+        uniform vec4 uColor;
+        
         void main() {
-           gl_Position = vec4(vPosition.x + uOffset.x, vPosition.y + uOffset.y, vPosition.z, vPosition.w);
-           gl_FragColor = texture2D(sTexture, TexCoord) * uColor;
-           TexCoord = vTexCoord;
+           gl_FragColor = texture2D(sTexture, vTexCoordOut) * uColor;
         }
     """.trimIndent()
 
@@ -125,20 +126,16 @@ class renderizado : GLSurfaceView.Renderer {
 
     override fun onDrawFrame(gl: GL10?) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
-        val offsetHandle = GLES20.glGetUniformLocation(ShaderPrograma, "uOffset")
+
         if (mSurfaceTexture != null) {
             try {
                 mSurfaceTexture!!.updateTexImage()
-            } catch (ignored: Exception) {
-            }
+            } catch (ignored: Exception) {}
         }
-        GLES20.glUniform2f(offsetHandle, 0.0f, 0.0f)
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6)
-        GLES20.glUniform2f(offsetHandle, 0.6f, 0.0f)
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6)
+
         GLES20.glUseProgram(ShaderPrograma)
 
-
+        // ponemos los atributos
         val posicionman = GLES20.glGetAttribLocation(ShaderPrograma, "vPosition")
         GLES20.glEnableVertexAttribArray(posicionman)
         GLES20.glVertexAttribPointer(posicionman, 3, GLES20.GL_FLOAT, false, 0, buffervertices)
@@ -147,21 +144,20 @@ class renderizado : GLSurfaceView.Renderer {
         GLES20.glEnableVertexAttribArray(uvHandle)
         GLES20.glVertexAttribPointer(uvHandle, 2, GLES20.GL_FLOAT, false, 0, bufferTexturas)
 
+        // ponelos la textura
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
         GLES20.glBindTexture(0x8D65, idTexturaOES)
         GLES20.glUniform1i(GLES20.glGetUniformLocation(ShaderPrograma, "sTexture"), 0)
 
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6)
-
-        // you will see -man everywhere i short manejador to "-man" in spanish wich means handle
+        // ponemos el color
         val colorman = GLES20.glGetUniformLocation(ShaderPrograma, "uColor")
-        if (paneltoque) {
-            GLES20.glUniform4f(colorman, 0.0f, 1.0f, 0.0f, 1.0f)
-        } else {
-            GLES20.glUniform4f(colorman, 0.0f, 1.0f, 0.88f, 1.0f)
-        }
+        GLES20.glUniform4f(colorman, 1.0f, 1.0f, 1.0f, 1.0f)
 
+        // posicion a 0 y a dibujar
+        val offsetHandle = GLES20.glGetUniformLocation(ShaderPrograma, "uOffset")
+        GLES20.glUniform2f(offsetHandle, 0.0f, 0.0f)
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6)
+
         GLES20.glDisableVertexAttribArray(posicionman)
         GLES20.glDisableVertexAttribArray(uvHandle)
     }
