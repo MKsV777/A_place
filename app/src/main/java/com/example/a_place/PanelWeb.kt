@@ -20,16 +20,17 @@ class PanelWeb(val context: Context, val url: String, val width: Int, val height
 
     init {
         (context as Activity).runOnUiThread {
+// Inside PanelWeb.kt init block
             webView = WebView(context).apply {
+                // Add this line! It forces the WebView to render into the buffer
+                setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+
                 settings.javaScriptEnabled = true
                 settings.domStorageEnabled = true
-                setLayerType(View.LAYER_TYPE_HARDWARE, null)
                 layout(0, 0, width, height)
                 measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
                     View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY))
                 webViewClient = WebViewClient()
-
-                // FIX: Use the class property explicitly
                 loadUrl(this@PanelWeb.url)
             }
         }
