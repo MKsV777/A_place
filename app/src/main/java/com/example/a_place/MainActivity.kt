@@ -6,10 +6,7 @@ import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnTouchListener
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
@@ -36,8 +33,12 @@ class MainActivity : AppCompatActivity() {
 
         glSurfaceView!!.setOnTouchListener(OnTouchListener { v: View?, event: MotionEvent? ->
             val accion = event!!.getAction()
-            val xd = event.getX() // xdddddddd
+            val xd = event.getX()
             val yd = event.getY()
+
+            // ADD THIS LINE HERE MANUALLY:
+            android.util.Log.d("TouchDebug", "Touch: $xd, $yd")
+
             when (accion) {
                 MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> renderer.actualizartoque(
                     xd,
@@ -54,15 +55,6 @@ class MainActivity : AppCompatActivity() {
             true
         })
 
-        glSurfaceView?.setOnTouchListener { v, event ->
-            val action = event?.action
-            val xd = event?.x
-            val yd = event?.y
-
-            android.util.Log.d("TouchDebug", "Touch: $xd, $yd")
-
-            true
-        }
 
         ViewCompat.setOnApplyWindowInsetsListener(glSurfaceView!!) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
