@@ -18,7 +18,8 @@ class renderizado(val context: Context) : GLSurfaceView.Renderer {
 
     private var ShaderPrograma = 0
 
-
+    private var anchopantalla = 1920f
+    private var altopantalla = 1080f
 
 
 
@@ -75,6 +76,7 @@ class renderizado(val context: Context) : GLSurfaceView.Renderer {
     """.trimIndent()
 
 
+
     private var paneltoque = false
     private val paneles = mutableListOf<PanelWeb>()
     private val pantallaAncho = 1f
@@ -111,6 +113,8 @@ class renderizado(val context: Context) : GLSurfaceView.Renderer {
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
         GLES20.glViewport(0, 0, width, height)
+        anchopantalla = width.toFloat()
+        altopantalla = height.toFloat()
     }
 
     override fun onDrawFrame(gl: GL10?) {
@@ -156,8 +160,8 @@ class renderizado(val context: Context) : GLSurfaceView.Renderer {
             paneltoque = true
             return
         }
-        val normalglx = (x / pantallaAncho) * 2.0f - 1.0f
-        val normalgly = (y / pantallaAlto) * 2.0f - 1.0f
+        val normalglx = (x / anchopantalla) * 2.0f - 1.0f
+        val normalgly = (y / altopantalla) * 2.0f - 1.0f
 
         if (normalglx >= -0.5f && normalglx <= 0.5f && normalgly >= -0.5f && normalgly <= 0.5f) {
             paneltoque = true

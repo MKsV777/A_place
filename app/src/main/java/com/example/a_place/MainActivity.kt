@@ -54,13 +54,21 @@ class MainActivity : AppCompatActivity() {
             true
         })
 
-        ViewCompat.setOnApplyWindowInsetsListener(
-            glSurfaceView!!,
-            OnApplyWindowInsetsListener { v: View?, insets: WindowInsetsCompat? ->
-                val systemBars = insets!!.getInsets(WindowInsetsCompat.Type.systemBars())
-                v!!.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-                insets
-            }) // android studio gave me this thing
+        glSurfaceView?.setOnTouchListener { v, event ->
+            val action = event?.action
+            val xd = event?.x
+            val yd = event?.y
+
+            android.util.Log.d("TouchDebug", "Touch: $xd, $yd")
+
+            true
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(glSurfaceView!!) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
     }
 
 

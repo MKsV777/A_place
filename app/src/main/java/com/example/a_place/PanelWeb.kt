@@ -64,11 +64,15 @@ class PanelWeb(val context: Context, val url: String, val width: Int, val height
             try {
                 val canvas = surface?.lockCanvas(null)
                 if (canvas != null) {
+                    canvas.drawColor(android.graphics.Color.WHITE) // Debug: fill with white first
                     webView?.draw(canvas)
                     surface?.unlockCanvasAndPost(canvas)
-                    needsUpdate = true // Signal that new data is ready
+                    needsUpdate = true
                 }
-            } catch (e: Exception) { e.printStackTrace() }
+            } catch (e: Exception) {
+                android.util.Log.e("PanelWeb", "Error updating", e)
+                e.printStackTrace()
+            }
         }
     }
 
