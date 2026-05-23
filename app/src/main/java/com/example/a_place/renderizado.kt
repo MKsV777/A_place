@@ -36,7 +36,7 @@ class renderizado(val context: Context) : GLSurfaceView.Renderer {
         1.0f, 0.0f
     )
 
-    // Standard sampler2D — no OES extension needed since we use GL_TEXTURE_2D
+    // estamos usando Standard sampler2D
     private val codigoShader = """
         attribute vec4 vPosition;
         attribute vec2 vTexCoord;
@@ -92,7 +92,7 @@ class renderizado(val context: Context) : GLSurfaceView.Renderer {
             val status = IntArray(1)
             GLES20.glGetProgramiv(it, GLES20.GL_LINK_STATUS, status, 0)
             if (status[0] == 0) {
-                android.util.Log.e("renderizado", "Link failed: ${GLES20.glGetProgramInfoLog(it)}")
+                android.util.Log.e("renderizado", "fallo algo checa linea 95 renderizado: ${GLES20.glGetProgramInfoLog(it)}")
             }
         }
     }
@@ -128,11 +128,11 @@ class renderizado(val context: Context) : GLSurfaceView.Renderer {
             GLES20.glUniform2f(offsetHandle, panel.xOffset, panel.yOffset)
             GLES20.glUniform4f(colorman, 1.0f, 1.0f, 1.0f, 1.0f)
 
-            GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, panel.textureId)
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0) // activamos la textura
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, panel.textureId) // ponemos la textura acompañada
             GLES20.glUniform1i(textureHandle, 0)
 
-            GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6)
+            GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6) // se dibuja los arreglos de los vertices osea el cuadrado o eso creo
         }
 
         GLES20.glDisableVertexAttribArray(posicionman)
@@ -145,7 +145,7 @@ class renderizado(val context: Context) : GLSurfaceView.Renderer {
         val normalgly = (y / altopantalla) * 2.0f - 1.0f
 
         paneltoque = normalglx >= -0.5f && normalglx <= 0.5f &&
-                normalgly >= -0.5f && normalgly <= 0.5f
+                normalgly >= -0.5f && normalgly <= 0.5f // si cae dentro de el panel toque!!!
     }
 
     fun cargashade(tipo: Int, codigo: String): Int {
@@ -156,7 +156,7 @@ class renderizado(val context: Context) : GLSurfaceView.Renderer {
         val status = IntArray(1)
         GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, status, 0)
         if (status[0] == 0) {
-            android.util.Log.e("renderizado", "Compile failed: ${GLES20.glGetShaderInfoLog(shader)}")
+            android.util.Log.e("renderizado", "fallo algo checa linea 159 renderizado: ${GLES20.glGetShaderInfoLog(shader)}")
         }
         return shader
     }

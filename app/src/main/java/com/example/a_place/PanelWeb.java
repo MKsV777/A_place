@@ -19,8 +19,8 @@ public class PanelWeb {
 
     private final Context context;
     private final String url;
-    private final int width;
-    private final int height;
+    private final int altura;
+    private final int anchura;
 
     private WebView webView;
     private boolean isReady = false;
@@ -31,8 +31,8 @@ public class PanelWeb {
     public PanelWeb(Context context, String url, int width, int height) {
         this.context = context;
         this.url = url;
-        this.width = width;
-        this.height = height;
+        this.altura = width;
+        this.anchura = height;
 
         if (context instanceof Activity) {
             ((Activity) context).runOnUiThread(new Runnable() {
@@ -42,7 +42,7 @@ public class PanelWeb {
                     webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 
                     webView.getSettings().setJavaScriptEnabled(true);
-                    webView.getSettings().setDomStorageEnabled(true);
+                    //webView.getSettings().setDomStorageEnabled(true); no creo que se ocupa la verdad
                     webView.getSettings().setUseWideViewPort(true);
                     webView.getSettings().setLoadWithOverviewMode(true);
 
@@ -50,15 +50,15 @@ public class PanelWeb {
                         @Override
                         public void onPageFinished(WebView view, String urlString) {
                             isReady = true;
-                            Log.d("PanelWeb", "Page loaded: " + urlString);
+                            Log.d("PanelWeb", "CARGO !!! " + urlString);
                             triggerSnapshot();
                         }
                     });
 
-                    webView.layout(0, 0, width, height);
-                    int widthSpec = View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY);
-                    int heightSpec = View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY);
-                    webView.measure(widthSpec, heightSpec);
+                    webView.layout(0, 0, width, height); // aver aca segun yo se pone en el ui talvez me quivoque
+                    int specancho = View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY);
+                    int specalto = View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY);
+                    webView.measure(specancho, specalto);
 
                     webView.loadUrl(url);
                 }
@@ -77,14 +77,14 @@ public class PanelWeb {
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
 
-        Log.d("PanelWeb", "GL_TEXTURE_2D initialized with ID: " + textureId);
+        Log.d("PanelWeb", "GL_TEXTURE_2D inicio con ID: " + textureId);
     }
 
     private void triggerSnapshot() {
         if (!isReady || webView == null) return;
 
         try {
-            Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Bitmap bmp = Bitmap.createBitmap(anchura, altura, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bmp);
             canvas.drawColor(Color.WHITE);
             webView.draw(canvas);
@@ -97,7 +97,7 @@ public class PanelWeb {
                 needsUpdate = true;
             }
         } catch (Exception e) {
-            Log.e("PanelWeb", "Error rendering WebView to Bitmap: " + e.getMessage(), e);
+            Log.e("PanelWeb", "error al convertir el webview a bitmap: " + e.getMessage(), e);
         }
     }
 
