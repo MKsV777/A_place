@@ -8,15 +8,15 @@ import java.io.IOException
 import kotlin.concurrent.thread
 
 object IpfsRpcBridge {
-    // The default RPC port for IPFS in Termux
+    // la direccion de la api de ipfs rpc http
     private const val API_BASE = "http://127.0.0.1:5001/api/v0"
 
-    // OkHttp client configured with a very long timeout for the subscription stream
+    // OkHttp client para un timeout muy largo
     private val client = OkHttpClient.Builder()
         .readTimeout(0, java.util.concurrent.TimeUnit.MILLISECONDS)
         .build()
 
-    fun publish(topic: String, message: String) {
+    fun publicar(topic: String, message: String) {
         val url = "$API_BASE/pubsub/pub".toHttpUrlOrNull()?.newBuilder()
             ?.addQueryParameter("arg", topic)
             ?.addQueryParameter("arg", message)
@@ -30,11 +30,11 @@ object IpfsRpcBridge {
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                println("❌ Failed to publish: ${e.message}")
+                println("no se publico la cosa: ${e.message}")
             }
 
             override fun onResponse(call: Call, response: Response) {
-                println("✅ Published to $topic. Status: ${response.code}")
+                println("se publico a $topic. la respuesta es : ${response.code}")
                 response.close()
             }
         })
