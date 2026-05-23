@@ -32,23 +32,34 @@ android {
 }
 
 dependencies {
+    // Standard Android dependencies
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity
     implementation libs.constraintlayout
     implementation libs.core.ktx
-    // Adding the Kotlin standard library back as requested earlier
 
-    implementation("io.libp2p:jvm-libp2p:0.11.0-RELEASE")
+    // LibP2P (Only include one version: 1.2.1 is generally more stable)
+    implementation("io.libp2p:jvm-libp2p:1.2.1") {
+        exclude group: 'io.netty', module: 'netty-all'
+    }
 
-    // 2. Coroutines (required for LibP2P to run asynchronously)
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    // Explicitly add required Netty modules to avoid 'netty-all' conflicts
+    implementation 'io.netty:netty-handler:4.1.100.Final'
+    implementation 'io.netty:netty-transport:4.1.100.Final'
+    implementation 'io.netty:netty-codec:4.1.100.Final'
+    implementation 'io.netty:netty-buffer:4.1.100.Final'
 
-    // 3. (Optional but recommended) For binary data handling
-    implementation("io.netty:netty-buffer:4.1.100.Final")
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    // Kotlin Support
+    implementation 'org.jetbrains.kotlin:kotlin-reflect:2.0.0'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.0.0'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.0'
 
+    // Coroutines
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+
+    // Testing
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
