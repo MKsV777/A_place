@@ -1,27 +1,21 @@
 pluginManagement {
     repositories {
-        google {
-            content {
-                includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
-                includeGroupByRegex("androidx.*")
-            }
-        }
+        google()
         mavenCentral()
         gradlePluginPortal()
     }
 }
 
-dependencyResolutionManagement {repositories {
-    google()
-    mavenCentral()
-    maven { url "https://dl.cloudsmith.io/public/libp2p/jvm-libp2p/maven/" }
-    // Optional: JitPack as a backup
-    maven { url "https://jitpack.io" }
-    maven { url "https://hyperledger.jfrog.io/artifactory/besu-maven/" }
-    maven { url "https://artifacts.consensys.net/public/maven/maven/" }
-
-}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        // ✅ Primary repositories for LibP2P JVM
+        maven { url 'https://artifacts.consensys.net/public/maven/maven/' }
+        maven { url 'https://dl.cloudsmith.io/public/libp2p/jvm-libp2p/maven/' }
+        maven { url 'https://jitpack.io' }
+    }
 }
 
 rootProject.name = "A_place"

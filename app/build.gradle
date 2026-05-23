@@ -14,7 +14,7 @@ android {
         versionCode 1
         versionName "1.0"
 
-        // Added to handle the large number of methods in LibP2P/Netty
+        // ✅ Required for large libraries like LibP2P
         multiDexEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -26,53 +26,34 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        // ✅ Modern libraries require Java 17
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
-
     kotlinOptions {
-        jvmTarget = '11'
-    }
-
-    // Ensure that both the app and dependencies use the same version of Kotlin
-    configurations.all {
-        resolutionStrategy.force "org.jetbrains.kotlin:kotlin-stdlib:2.0.0"
+        jvmTarget = '17'
     }
 }
 
 dependencies {
-    // Standard Android dependencies
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity
     implementation libs.constraintlayout
     implementation libs.core.ktx
 
-    // LibP2P 1.2.1
-    // FIXED: Corrected the exclude syntax to avoid Gradle DSL errors
-    implementation("io.libp2p:jvm-libp2p:1.2.1-RELEASE") {
-        exclude group: 'io.netty', module: 'netty-all'
-    }
-
-    // Explicitly add required Netty modules to avoid 'netty-all' conflicts
-    implementation 'io.netty:netty-handler:4.1.100.Final'
-    implementation 'io.netty:netty-transport:4.1.100.Final'
-    implementation 'io.netty:netty-codec:4.1.100.Final'
-    implementation 'io.netty:netty-buffer:4.1.100.Final'
-    implementation 'io.netty:netty-common:4.1.100.Final'
-
-    // Kotlin Support
-    implementation 'org.jetbrains.kotlin:kotlin-reflect:2.0.0'
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.0.0'
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.0'
+    // ✅ LibP2P and its required network components
+    implementation("io.libp2p:jvm-libp2p:0.11.0")
+    implementation("io.netty:netty-all:4.1.100.Final")
 
     // Coroutines
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
-    // Testing
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
