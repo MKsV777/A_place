@@ -1,37 +1,38 @@
 package com.example.a_place
+
 import io.libp2p.core.Host
 import io.libp2p.core.dsl.host
 import io.libp2p.core.pubsub.Topic
 import io.libp2p.core.pubsub.MessageApi
-import io.libp2p.pubsub.gossip.GossipSub
-import io.libp2p.pubsub.gossip.GossipSubParams
+import io.libp2p.pubsub.gossip.GossipSub // Correct import
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.launch
 import java.nio.charset.StandardCharsets
 
-class P2PBridge {
+object P2PBridge {
     private var host: Host? = null
-    // Create GossipSub protocol
-    private val gossipSub = GossipSub(GossipSubParams.defaultBuilder().build())
-    // Use a background scope for Android so we don't block the UI
+
+    // In 1.2.1-RELEASE, GossipSub is initialized directly
+    // without the "builders" sub-package.
+    private val gossipSub = GossipSub()
+
     private val scope = CoroutineScope(Dispatchers.IO)
 
     fun start() {
         scope.launch {
             try {
-                // The correct DSL function is 'host' from io.libp2p.core.dsl
                 val vHost = host {
                     network {
                         listen("/ip4/0.0.0.0/tcp/4001")
                     }
                     protocols {
+                        // The gossipSub protocol is added here
                         add(gossipSub)
                     }
                 }
 
-                // start() returns a CompletableFuture. .get() waits for it to finish.
+                // .get() waits for the CompletableFuture to complete
                 vHost.start().get()
                 host = vHost
                 println("LibP2P Host started on: ${vHost.listenAddresses()}")
@@ -42,29 +43,25 @@ class P2PBridge {
     }
 
     fun publish(topic: String, message: String) {
-        // In 1.2.x, publish is accessed through gossipSub.api
         val bytes = message.toByteArray(StandardCharsets.UTF_8)
+        // Use the .api property of gossipSub to publish in 1.2.x
         gossipSub.api.publish(bytes, Topic(topic))
     }
 
-    // Functional Interface for Java compatibility
     fun interface MessageCallback {
         fun onMessage(text: String)
     }
 
     fun subscribe(topic: String, callback: MessageCallback) {
-        // Specify : MessageApi to fix the "Unresolved reference data" error
+        // Use the .api property of gossipSub to subscribe in 1.2.x
         gossipSub.api.subscribe({ msg: MessageApi ->
             val data = msg.data
-
-            // This part handles the Netty ByteBuf safely
             val bytes = ByteArray(data.readableBytes())
-            data.getBytes(data.readerIndex(), bytes) // Use getBytes to avoid moving the index
-
+            data.getBytes(data.readerIndex(), bytes)
             val text = String(bytes, StandardCharsets.UTF_8)
 
             callback.onMessage(text)
-        }, androidx.privacysandbox.ads.adservices.topics.Topic(topic))
+        }, Topic(topic))
     }
 
     fun stop() {

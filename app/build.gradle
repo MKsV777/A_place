@@ -13,6 +13,10 @@ android {
         targetSdk 36
         versionCode 1
         versionName "1.0"
+
+        // Added to handle the large number of methods in LibP2P/Netty
+        multiDexEnabled true
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -22,12 +26,19 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = '11'
+    }
+
+    // Ensure that both the app and dependencies use the same version of Kotlin
+    configurations.all {
+        resolutionStrategy.force "org.jetbrains.kotlin:kotlin-stdlib:2.0.0"
     }
 }
 
@@ -39,8 +50,9 @@ dependencies {
     implementation libs.constraintlayout
     implementation libs.core.ktx
 
-    // LibP2P (Only include one version: 1.2.1 is generally more stable)
-    implementation("io.libp2p:jvm-libp2p:1.2.1") {
+    // LibP2P 1.2.1
+    // FIXED: Corrected the exclude syntax to avoid Gradle DSL errors
+    implementation("io.libp2p:jvm-libp2p:1.2.1-RELEASE") {
         exclude group: 'io.netty', module: 'netty-all'
     }
 
@@ -49,6 +61,7 @@ dependencies {
     implementation 'io.netty:netty-transport:4.1.100.Final'
     implementation 'io.netty:netty-codec:4.1.100.Final'
     implementation 'io.netty:netty-buffer:4.1.100.Final'
+    implementation 'io.netty:netty-common:4.1.100.Final'
 
     // Kotlin Support
     implementation 'org.jetbrains.kotlin:kotlin-reflect:2.0.0'
