@@ -17,10 +17,11 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        // Required for jvm-libp2p
+        // ✅ Official LibP2P repository
         maven { url = uri("https://dl.cloudsmith.io/public/libp2p/jvm-libp2p/maven/") }
-        maven { url = uri("https://jitpack.io") }
+        // LibP2P dependencies often live here
         maven { url = uri("https://artifacts.consensys.net/public/maven/maven/") }
+        maven { url = uri("https://jitpack.io") }
     }
 }
 
