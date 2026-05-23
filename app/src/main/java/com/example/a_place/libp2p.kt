@@ -44,7 +44,7 @@ object IpfsRpcBridge {
         fun onMessage(text: String, senderId: String)
     }
 
-    fun subscribe(topic: String, callback: MessageCallback) {
+    fun subscibirse(topic: String, callback: MessageCallback) {
         val url = "$API_BASE/pubsub/sub".toHttpUrlOrNull()?.newBuilder()
             ?.addQueryParameter("arg", topic)
             ?.build() ?: return
@@ -77,12 +77,12 @@ object IpfsRpcBridge {
 
                         val senderId = json.getString("from")
 
-                        println("📩 Received: $text")
+                        println("se recibio: $text")
                         callback.onMessage(text, senderId)
                     }
                 }
             } catch (e: Exception) {
-                println("❌ Subscription dropped: ${e.message}")
+                println("ya no conectado a la subscripcion: ${e.message}")
             }
         }
     }
