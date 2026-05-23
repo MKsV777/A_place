@@ -38,6 +38,15 @@ dependencies {
     implementation libs.constraintlayout
     implementation libs.core.ktx
     // Adding the Kotlin standard library back as requested earlier
+
+    implementation("io.libp2p:jvm-libp2p:0.11.0-RELEASE")
+
+    // 2. Coroutines (required for LibP2P to run asynchronously)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    // 3. (Optional but recommended) For binary data handling
+    implementation("io.netty:netty-buffer:4.1.100.Final")
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
     testImplementation libs.junit
