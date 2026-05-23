@@ -44,8 +44,8 @@ dependencies {
     implementation libs.core.ktx
 
     // ✅ LibP2P and its required network components
-    implementation("io.libp2p:jvm-libp2p:0.11.0")
-    implementation("io.netty:netty-all:4.1.100.Final")
+    //implementation("io.libp2p:jvm-libp2p:0.11.0")
+    //implementation("io.netty:netty-all:4.1.100.Final")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
