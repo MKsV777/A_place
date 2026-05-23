@@ -8,6 +8,7 @@ import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
+import android.opengl.Matrix
 
 class renderizado(val context: Context) : GLSurfaceView.Renderer {
     private var buffervertices: FloatBuffer? = null
@@ -16,6 +17,7 @@ class renderizado(val context: Context) : GLSurfaceView.Renderer {
     private var anchopantalla = 1920f
     private var altopantalla = 1080f
 
+    private val modelMatrix = FloatArray(16)
     private val panel = floatArrayOf(
         -0.5f,  0.5f, 0.0f,
         -0.5f, -0.5f, 0.0f,
@@ -40,10 +42,10 @@ class renderizado(val context: Context) : GLSurfaceView.Renderer {
     private val codigoShader = """
         attribute vec4 vPosition;
         attribute vec2 vTexCoord;
-        uniform vec2 uOffset;
+        uniform mat4 uMatrix;
         varying vec2 vTexCoordOut;
         void main() {
-            gl_Position = vec4(vPosition.x + uOffset.x, vPosition.y + uOffset.y, vPosition.z, vPosition.w);
+            gl_Position = uMatrix * vPosition;
             vTexCoordOut = vTexCoord;
         }
     """.trimIndent()
@@ -109,7 +111,7 @@ class renderizado(val context: Context) : GLSurfaceView.Renderer {
 
         val posicionman = GLES20.glGetAttribLocation(ShaderPrograma, "vPosition")
         val uvHandle    = GLES20.glGetAttribLocation(ShaderPrograma, "vTexCoord")
-        val offsetHandle = GLES20.glGetUniformLocation(ShaderPrograma, "uOffset")
+        val matrixman = GLES20.glGetUniformLocation(ShaderPrograma, "uMatrix")
         val colorman     = GLES20.glGetUniformLocation(ShaderPrograma, "uColor")
         val textureHandle = GLES20.glGetUniformLocation(ShaderPrograma, "sTexture")
 
@@ -125,6 +127,18 @@ class renderizado(val context: Context) : GLSurfaceView.Renderer {
             panel.update()
             panel.updateTexture()
 
+            Matrix.setIdentityM(modelMatrix, 0)
+            Matrix.translateM(modelMatrix, 0, panel.xOffset, panel.yOffset, 0f)
+            Matrix.rotateM(modelMatrix, 0, panel.rotation, 0f, 0f, 1.0f)
+            GLES20.glUniformMatrix4fv(matrixman, 1, false, modelMatrix, 0)
+            GLES20.glUniform4f(colorman, 1.0f, 1.0f, 1.0f, 1.0f)
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0) // activamos la textura)
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, panel.textureId) // ponemos la textura acompañada
+            GLES20.glUniform1i(textureHandle, 0)
+            GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6) // se dibuja los arreglos de los vertices osea el cuadrado o eso creo
+            /*panel.update()
+            panel.updateTexture()
+
             GLES20.glUniform2f(offsetHandle, panel.xOffset, panel.yOffset)
             GLES20.glUniform4f(colorman, 1.0f, 1.0f, 1.0f, 1.0f)
 
@@ -132,7 +146,7 @@ class renderizado(val context: Context) : GLSurfaceView.Renderer {
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, panel.textureId) // ponemos la textura acompañada
             GLES20.glUniform1i(textureHandle, 0)
 
-            GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6) // se dibuja los arreglos de los vertices osea el cuadrado o eso creo
+            GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6) // se dibuja los arreglos de los vertices osea el cuadrado o eso creo*/
         }
 
         GLES20.glDisableVertexAttribArray(posicionman)

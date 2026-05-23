@@ -27,8 +27,14 @@ public class PanelWeb {
     private Bitmap pendingBitmap = null;
     private final Object bitmapLock = new Object();
     private boolean needsUpdate = false;
-
+    public float rotation = 0f;
     public PanelWeb(Context context, String url, int width, int height) {
+        /*var xOffset: Float = 0f;
+        var yOffset: Float = 0f;
+        var rotation: Float = 0f;*/
+
+
+
         this.context = context;
         this.url = url;
         this.altura = width;
